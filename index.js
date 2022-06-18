@@ -21,7 +21,7 @@ app.use(errorMiddleware);
 const start = async () => {
     try {
 
-        // console.log();
+        console.log('  WordStorm');
         await mongoose.connect(process.env.DB_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
