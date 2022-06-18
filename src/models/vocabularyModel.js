@@ -1,8 +1,9 @@
+const { VOCABULARY_COLLECTION } = require('../config');
 const {Schema, model} = require('mongoose');
 
 const VocaularySchema = new Schema({
     user: {type: Schema.Types.ObjectId, ref: 'User'},
-    word: {type: String, unique: true, required: true},
+    word: {type: String, required: true},
     translation: {type: String, required: true},
     status: {
 		type: String, 
@@ -16,5 +17,5 @@ const VocaularySchema = new Schema({
     active: {type: Boolean, default: true},
 });
 
-module.exports = model('Vocaulary', VocaularySchema);
+module.exports = model('Vocaulary', VocaularySchema, VOCABULARY_COLLECTION);
 

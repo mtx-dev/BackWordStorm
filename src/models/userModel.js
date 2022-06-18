@@ -15,7 +15,6 @@ const UserSchema = new Schema({
     // TODO: realize Activations
     isActivated: {type: Boolean, default: true},
     settings: {type: SettingsSchema, required: true},
-    vocbulary:[{ type: Schema.Types.ObjectId, ref: 'Vocaulary' }],
 });
 
 module.exports = model('User', UserSchema);
