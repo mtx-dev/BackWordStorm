@@ -1,36 +1,31 @@
-const nodemailer = require('nodemailer');
+import nodemailer from "nodemailer";
 
 class MailService {
-    constructor() {
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+  }
 
-        this.transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: true,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASSWORD,
-            }
-        });
-    }
-
-    async sendActivationMail(to, link) {
-        await this.transporter.sendMail({
-            from: process.env.SMTP_USER,
-            to,
-            subject: `Activation account at ${process.env.API_NAME}`,
-            text: '',
-            html:
-                `
-                <div>
-                    <h1>Activation account</h1>
-                    <a href="${link}">${link}</a>
-                </div>
-                `,
-        });
-    }
-
+  async sendActivationMail(to, link) {
+    await this.transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to,
+      subject: `Activation account at ${process.env.API_NAME}`,
+      text: "",
+      html: `
+            <div>
+                <h1>Activation account</h1>
+                <a href="${link}">${link}</a>
+            </div>`,
+    });
+  }
 }
-
 
 module.exports = new MailService();
