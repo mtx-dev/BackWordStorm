@@ -1,11 +1,41 @@
 require('dotenv').config();
+const { 
+	ENGLISH_DICTIONARY_COLLECTION, 
+	RUSSIAN_DICTIONARY_COLLECTION,
+	VOCABULARY_COLLECTION
+} = require ( '../src/config');
+
 const { kMaxLength } = require('buffer');
 const fs = require('fs');
 const path = require("path");
 const mongoose = require('mongoose');
-const DictionaryModel = require('../src/models/dictionaryModel');
+const { EngDictionaryModel, RusDictionaryModel } = require('../src/models/dictionaryModel');
+const VocaularyModel = require('../src/models/vocabularyModel');
 
 const ENGLISH_DICTIONARY_PATH = 'englishDictionary.json';
+const RUSSIAN_DICTIONARY_PATH = 'russianDictionary.json';
+const VOCABULARY_PATH = 'vocabulary.json';
+
+const flow= [
+	{
+		name: 'English Dictionary',
+		path: ENGLISH_DICTIONARY_PATH,
+		model: EngDictionaryModel,
+		collection: ENGLISH_DICTIONARY_COLLECTION,
+	},
+	{
+		name: 'Russain Dictionary',
+		path: RUSSIAN_DICTIONARY_PATH,
+		model: RusDictionaryModel,
+		collection: RUSSIAN_DICTIONARY_COLLECTION,
+	},
+	{
+		name: 'Vocabulary',
+		path: VOCABULARY_PATH,
+		model: VocaularyModel,
+		collection: VOCABULARY_COLLECTION,
+	},
+]
 
 const arg = process.argv[2];
 const connectionStauses = [
@@ -31,36 +61,38 @@ const readJsonFile = (path) => {
 	}
 }
 
-const up = async () => {
-	const dictionary = readJsonFile(path.resolve(__dirname, ENGLISH_DICTIONARY_PATH));
+const upCollection = async (name, collectionPath, model) => {
+	console.log('==== MIGRATE ===== ', name, ' Collection');
+	console.log('Start Reading...');
+	const collection = readJsonFile(path.resolve(__dirname, collectionPath));
 
-	if (!dictionary?.length) {
+	if (!collection?.length) {
 		throw new Error('No records')
 	}
 
-	console.log('Read records', dictionary.length);
+	console.log('Read records', collection.length);
 
-	const mappedDictionary = dictionary.map(word => {
+	const mappedCollection = collection.filter((i,idx) => idx < 50 ).map(word => {
 		return {
 			insertOne: {
 				document: word
 			}
 		};
 	});
-	console.log('Start connect');
-
-	const dictinaryBlocks = [];
+	
+	const blocks = [];
 	const blockSize = 10000;
-
-	for (let index = 0; index <= Math.floor(mappedDictionary.length / blockSize); index++) {
+	
+	for (let index = 0; index <= Math.floor(mappedCollection.length / blockSize); index++) {
 		const start = index * blockSize;
-		const end = (index + 1) * blockSize > mappedDictionary.length ? 
-		mappedDictionary.length :
-			(index + 1) * blockSize
-		dictinaryBlocks[index] = mappedDictionary.slice(start, end);
+		const end = (index + 1) * blockSize > mappedCollection.length ? 
+		mappedCollection.length :
+		(index + 1) * blockSize
+		blocks[index] = mappedCollection.slice(start, end);
 	}
-	console.log('Split to ', dictinaryBlocks.length, ' blocks');
-
+	console.log('Splited to ', blocks.length, ' blocks');
+	
+	console.log('Start connect...');
 	await mongoose.connect(process.env.DB_URL, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -72,50 +104,61 @@ const up = async () => {
 	try {
 		let i = 0;
 		let response = { ok: 1 };
-		const amoutBlocks = dictinaryBlocks.length;
+		const amoutBlocks = blocks.length;
 		
 		while (i < amoutBlocks && response.ok ) {
-			response = await DictionaryModel.bulkWrite(dictinaryBlocks[i]);
+			response = await model.bulkWrite(blocks[i]);
 			console.log(`Saved ${i + 1}/${amoutBlocks} blocks - ${response.nInserted} items`);
 			i++;
 		}
 
 		if (!response.ok) throw new Error(`Migration was failed on block ${i}`);
-		console.log('\nDictionary created\n');
+		console.log('======> ',name,' created\n');
 		
 	} catch (error) {
 		console.error('Error:', error);
 	} finally {
 		await mongoose.disconnect(); 
 		connectionStatus(); 
+		console.log('\n');
 	}
 }
 
 const drop = async() => {
+	console.log(' --- Drop all collections ---');
 	await mongoose.connect(process.env.DB_URL, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
 		useCreateIndex: true,
 	}, (error) => console.error(error));
 
-	mongoose.connection.once('open', function () {
+	mongoose.connection.once('open', async function () {
 		connectionStatus(); 
-		mongoose.connection.db.dropCollection(
-			"dictionary", async function(err) {
-			if (err)  {
-			   mongoose.disconnect();  
-			   console.error(err);
-			   return;
+		try {
+			for (base of flow) {
+				await mongoose.connection.db.dropCollection(base.collection);
+				console.log('\n', base.name, ' dropped \n');
 			}
-			console.log('\nDictionary dropped\n');
+		} catch (error) {
+			mongoose.disconnect();  
+			console.error(err);
+			return;
+		} finally {
 			await mongoose.disconnect(); 
 			connectionStatus(); 
-		});
+		}
 	});
 }
 
+const upCollections = async () => {
+	for (base of flow) {
+		await upCollection(base.name, base.path, base.model);
+	}
+}
+
+
 const commands = {
-	up: up,
+	up: async () => upCollections(),
 	drop: drop,
 }
 

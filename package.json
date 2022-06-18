@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "dev": "nodemon index.js",
-    "migrate:up" : "node migrations/migrate.js up",
-    "migrate:drop" : "node migrations/migrate.js drop"
+    "migrate:up": "node migrations/migrate.js up",
+    "migrate:drop": "node migrations/migrate.js drop"
   },
   "keywords": [],
   "author": "",
