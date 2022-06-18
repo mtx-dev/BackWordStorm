@@ -1,2 +1,9 @@
-export const ENGLISH_DICTIONARY_COLLECTION = 'englishDuctionary';
-export const RUSSIAN_DICTIONARY_COLLECTION = 'russianDuctionary';
+ const ENGLISH_DICTIONARY_COLLECTION = 'englishDuctionary';
+ const RUSSIAN_DICTIONARY_COLLECTION = 'russianDuctionary';
+ const VOCABULARY_COLLECTION = 'vocaulary';
+
+ module.exports = {
+	ENGLISH_DICTIONARY_COLLECTION,
+	RUSSIAN_DICTIONARY_COLLECTION,
+	VOCABULARY_COLLECTION,
+ }
