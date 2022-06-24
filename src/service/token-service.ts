@@ -1,8 +1,11 @@
 import jwt from "jsonwebtoken";
+import { Types } from "mongoose";
 import tokenModel from "../models/tokenModel";
+import { AccessToken, RefreshToken, Tokens } from "../interfaces/Tokens";
+import { UserDto } from "../dtos/user-dto";
 
 class TokenService {
-  generateTokens(payload) {
+  generateTokens(payload): Tokens {
     const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
       expiresIn: "30m",
     });
@@ -15,25 +18,31 @@ class TokenService {
     };
   }
 
-  validationAccessToken(token) {
+  validationAccessToken(token: AccessToken) {
     try {
-      const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+      const userData = jwt.verify(
+        token,
+        process.env.JWT_ACCESS_SECRET
+      ) as UserDto;
       return userData;
     } catch (error) {
       return null;
     }
   }
 
-  validationRefreshToken(token) {
+  validationRefreshToken(token: RefreshToken) {
     try {
-      const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+      const userData = jwt.verify(
+        token,
+        process.env.JWT_REFRESH_SECRET
+      ) as UserDto;
       return userData;
     } catch (error) {
       return null;
     }
   }
 
-  async saveToken(userId, refreshToken) {
+  async saveToken(userId: Types.ObjectId, refreshToken: RefreshToken) {
     const tokenData = await tokenModel.findOne({ user: userId });
     if (tokenData) {
       tokenData.refreshToken = refreshToken;
@@ -43,15 +52,15 @@ class TokenService {
     return token;
   }
 
-  async removeToken(refreshToken) {
+  async removeToken(refreshToken: RefreshToken) {
     const tokenData = await tokenModel.deleteOne({ refreshToken });
     return tokenData;
   }
 
-  async findToken(refreshToken) {
+  async findToken(refreshToken: RefreshToken) {
     const tokenData = await tokenModel.findOne({ refreshToken });
     return tokenData;
   }
 }
 
-module.exports = new TokenService();
+export default new TokenService();
