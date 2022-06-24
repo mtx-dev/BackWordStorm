@@ -1,7 +1,8 @@
+import { type NextFunction, type Request, type Response } from "express";
 import ApiError from "../exeptions/api-error";
 import tokenService from "../service/token-service";
 
-export default function (req, res, next) {
+export default function (req: Request, res: Response, next: NextFunction) {
   try {
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) {
@@ -18,7 +19,7 @@ export default function (req, res, next) {
       next(ApiError.UnauthorizedError());
     }
 
-    req.user = userData;
+    res.locals.user = userData;
     next();
   } catch (e) {
     return next(ApiError.UnauthorizedError());
