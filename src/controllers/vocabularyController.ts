@@ -1,18 +1,16 @@
-import userService from "../service/user-service";
 import ApiError from "../exeptions/api-error";
+import vocabularyService from "../service/vocabularyService";
+import { UserDto } from "../dtos/user-dto";
 
 class VocabularyController {
   async getVocabulary(req, res, next) {
     try {
-      // TODO cheack on norm str
-      // const errors = validationResult(req);
-      const { refreshToken } = req.cookies;
-      const userData = await userService.getCurrentUser(refreshToken);
+      const userData = res.locals.user as UserDto;
 
       if (!userData) {
         return next(ApiError.UnauthorizedError());
       }
-      const vocabulary = await vocabularyService.getAll(userData.id);
+      const vocabulary = await vocabularyService.getVocabulary(userData.id);
 
       console.log("======== VocabularyController  GET ALL");
 
@@ -24,14 +22,13 @@ class VocabularyController {
 
   async addWord(req, res, next) {
     try {
-      // TODO cheack on norm str
-      const { refreshToken } = req.cookies;
-      const userData = await userService.getCurrentUser(refreshToken);
+      const userData = res.locals.user;
+
       if (!userData) {
         return next(ApiError.UnauthorizedError());
       }
       const { word, transaltion } = req.body;
-      const vocabularyItem = await vocabularyService.add(
+      const vocabularyItem = await vocabularyService.addWord(
         userData.id,
         word,
         transaltion
@@ -45,11 +42,14 @@ class VocabularyController {
 
   async update(req, res, next) {
     try {
-      // TODO cheack on norm str
+      const userData = res.locals.user;
+      if (!userData) {
+        return next(ApiError.UnauthorizedError());
+      }
       const { wordUpdates } = req.body;
       // TODO chek empty property
-      const updatedWord = await userService.update(wordUpdates);
-      console.log("======== logout");
+      const updatedWord = await vocabularyService.updateWord(wordUpdates);
+      console.log("======== VocabularyController update");
       // res.json(token);
     } catch (error) {
       next(error);
