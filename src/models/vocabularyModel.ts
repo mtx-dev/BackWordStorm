@@ -1,10 +1,29 @@
 import { VOCABULARY_COLLECTION } from "../config";
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const VocaularySchema = new Schema({
+enum WordStatus {
+  "unknown",
+  "study",
+  "learned",
+}
+
+export interface IVocabularyModel {
+  user: Types.ObjectId;
+  word: string;
+  translation: string;
+  note: string;
+  status: WordStatus;
+  lastSuccessful: string;
+  attempts: number;
+  successfulAttempts: number;
+  active: boolean;
+}
+
+const VocabularySchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: "User" },
   word: { type: String, required: true },
   translation: { type: String, required: true },
+  note: { type: String },
   status: {
     type: String,
     required: true,
@@ -17,4 +36,8 @@ const VocaularySchema = new Schema({
   active: { type: Boolean, default: true },
 });
 
-export default model("Vocaulary", VocaularySchema, VOCABULARY_COLLECTION);
+export default model<IVocabularyModel>(
+  "Vocabulary",
+  VocabularySchema,
+  VOCABULARY_COLLECTION
+);
