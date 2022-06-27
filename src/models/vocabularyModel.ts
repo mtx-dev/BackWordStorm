@@ -1,13 +1,14 @@
 import { VOCABULARY_COLLECTION } from "../config";
 import { Schema, model, Types } from "mongoose";
 
-enum WordStatus {
+export enum WordStatus {
   "unknown",
   "study",
   "learned",
 }
 
 export interface IVocabularyModel {
+  _id: Types.ObjectId;
   user: Types.ObjectId;
   word: string;
   translation: string;
