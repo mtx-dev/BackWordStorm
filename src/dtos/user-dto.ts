@@ -2,13 +2,13 @@ import { Types } from "mongoose";
 import { IUser } from "../interfaces/IUser";
 
 export class UserDto {
-  email: string;
   id: Types.ObjectId;
+  email: string;
   isActivated: boolean;
 
   constructor(model: IUser) {
-    this.email = model.email;
     this.id = model._id;
+    this.email = model.email;
     this.isActivated = model.isActivated;
   }
 }
