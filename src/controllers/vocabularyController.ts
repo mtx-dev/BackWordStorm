@@ -1,12 +1,13 @@
 import ApiError from "../exeptions/api-error";
 import vocabularyService from "../service/vocabularyService";
 import { UserDto } from "../dtos/user-dto";
+import { Request } from "express";
+import { IVocabularyModel } from "../models/vocabularyModel";
 
 class VocabularyController {
   async getVocabulary(req, res, next) {
     try {
       const userData = res.locals.user as UserDto;
-
       if (!userData) {
         return next(ApiError.UnauthorizedError());
       }
@@ -20,19 +21,26 @@ class VocabularyController {
     }
   }
 
-  async addWord(req, res, next) {
+  async addWord(req: Request, res, next) {
     try {
-      const userData = res.locals.user;
-
+      const userData: UserDto = res.locals.user;
       if (!userData) {
         return next(ApiError.UnauthorizedError());
       }
-      const { word, transaltion } = req.body;
+      const { word, translation, note } = req.body;
+      console.log("body", word, translation, note);
+      // TODO Rework to express validation
+      if (!word || !translation) {
+        return next(ApiError.BadRequest(`Word and translation are required`));
+      }
+
       const vocabularyItem = await vocabularyService.addWord(
         userData.id,
         word,
-        transaltion
+        translation,
+        note
       );
+
       console.log("======== VocabularyController  addWord");
       return res.json(vocabularyItem);
     } catch (error) {
@@ -46,11 +54,15 @@ class VocabularyController {
       if (!userData) {
         return next(ApiError.UnauthorizedError());
       }
-      const { wordUpdates } = req.body;
+      const { word } = req.body;
+      console.log(word);
       // TODO chek empty property
-      const updatedWord = await vocabularyService.updateWord(wordUpdates);
+      const updatedWord = await vocabularyService.updateWord(
+        userData.id,
+        word as IVocabularyModel
+      );
       console.log("======== VocabularyController update");
-      // res.json(token);
+      res.json(updatedWord);
     } catch (error) {
       next(error);
     }
