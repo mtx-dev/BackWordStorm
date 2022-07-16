@@ -1,20 +1,22 @@
-require("dotenv").config();
-const {
+import dotenv from "dotenv";
+dotenv.config();
+import {
   ENGLISH_DICTIONARY_COLLECTION,
   RUSSIAN_DICTIONARY_COLLECTION,
   VOCABULARY_COLLECTION,
-} = require("../src/config");
+} from "../src/config/index.js";
 
-const { kMaxLength } = require("buffer");
-const fs = require("fs");
-const path = require("path");
-const mongoose = require("mongoose");
-const {
+import fs from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
+import mongoose from "mongoose";
+import {
   EngDictionaryModel,
   RusDictionaryModel,
-} = require("../src/models/dictionaryModel");
-const VocabularyModel = require("../src/models/vocabularyModel");
+} from "../src/models/dictionaryModel.js";
+import VocabularyModel from "../src/models/vocabularyModel.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ENGLISH_DICTIONARY_PATH = "englishDictionary.json";
 const RUSSIAN_DICTIONARY_PATH = "russianDictionary.json";
 const VOCABULARY_PATH = "vocabulary.json";
@@ -40,13 +42,13 @@ const flow = [
   },
 ];
 
-const arg = process.argv[2];
 const connectionStauses = [
   "disconnected",
   "connected",
   "connecting",
   "disconnecting",
 ];
+
 mongoose.connection.on("error", console.error);
 
 const connectionStatus = () => {
@@ -76,7 +78,7 @@ const upCollection = async (name, collectionPath, model) => {
   console.log("Read records", collection.length);
 
   const mappedCollection = collection
-    .filter((i, idx) => idx < 50)
+    // .filter((i, idx) => idx < 50)
     .map((word) => {
       return {
         insertOne: {
@@ -139,7 +141,7 @@ const upCollection = async (name, collectionPath, model) => {
   }
 };
 
-const drop = async () => {
+const dropAll = async () => {
   console.log(" --- Drop all collections ---");
   await mongoose.connect(
     process.env.DB_URL,
@@ -154,13 +156,49 @@ const drop = async () => {
   mongoose.connection.once("open", async function () {
     connectionStatus();
     try {
-      for (base of flow) {
+      for (let base of flow) {
         await mongoose.connection.db.dropCollection(base.collection);
         console.log("\n", base.name, " dropped \n");
       }
     } catch (error) {
       mongoose.disconnect();
-      console.error(err);
+      console.error(error);
+      return;
+    } finally {
+      await mongoose.disconnect();
+      connectionStatus();
+    }
+  });
+};
+
+const drop = async (collevtionName) => {
+  console.log(" --- Drop  collection ---", collevtionName);
+  const collectionIndex = flow.findIndex((c) => c.name === collevtionName);
+  if (collectionIndex < 0) {
+    console.log("Wrong command ", arg);
+    process.exit(127);
+  }
+
+  await mongoose.connect(
+    process.env.DB_URL,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    },
+    (error) => console.error(error)
+  );
+
+  mongoose.connection.once("open", async function () {
+    connectionStatus();
+    try {
+      await mongoose.connection.db.dropCollection(
+        flow[collectionIndex].collection
+      );
+      console.log("\n", flow[collectionIndex].name, " dropped \n");
+    } catch (error) {
+      mongoose.disconnect();
+      console.error(error);
       return;
     } finally {
       await mongoose.disconnect();
@@ -170,42 +208,22 @@ const drop = async () => {
 };
 
 const upCollections = async () => {
-  for (base of flow) {
+  for (let base of flow) {
     await upCollection(base.name, base.path, base.model);
   }
 };
 
 const commands = {
   up: async () => upCollections(),
+  dropAll: dropAll,
   drop: drop,
 };
+const arg = process.argv[2];
+const fistParam = process.argv[3];
 
 if (!(arg in commands)) {
   console.log("Wrong command ", arg);
   process.exit(127);
 }
 
-commands[arg]();
-
-// DictionaryModel.bulkWrite(d, async function(err,  res) {
-// 	if (err)  {
-// 	   mongoose.disconnect();  // Make sure to close connection
-// 	   console.error(err);
-// 	   return;
-// 	}
-// 	console.log('\nDictionary created\n');
-// 	console.log(res.insertedCount, res.modifiedCount, res.deletedCount);
-// 	await mongoose.disconnect(); // Make sure to close connection
-// 	connectionStatus();
-// });
-
-// DictionaryModel.create(d, async function(err) {
-// 	if (err)  {
-// 	   mongoose.disconnect();  // Make sure to close connection
-// 	   console.error(err);
-// 	   return;
-// 	}
-// 	console.log('\nDictionary created\n');
-// await mongoose.disconnect(); // Make sure to close connection
-// connectionStatus();
-// });
+commands[arg](fistParam);
