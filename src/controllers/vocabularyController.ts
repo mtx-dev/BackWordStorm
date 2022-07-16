@@ -8,9 +8,7 @@ class VocabularyController {
   async getVocabulary(req, res, next) {
     try {
       const userData = res.locals.user as UserDto;
-      if (!userData) {
-        return next(ApiError.UnauthorizedError());
-      }
+
       const vocabulary = await vocabularyService.getVocabulary(userData.id);
 
       console.log("======== VocabularyController  GET ALL");
@@ -24,9 +22,6 @@ class VocabularyController {
   async addWord(req: Request, res, next) {
     try {
       const userData: UserDto = res.locals.user;
-      if (!userData) {
-        return next(ApiError.UnauthorizedError());
-      }
       const { word, translation, note } = req.body;
       console.log("body", word, translation, note);
       // TODO Rework to express validation
@@ -51,15 +46,12 @@ class VocabularyController {
   async update(req, res, next) {
     try {
       const userData = res.locals.user;
-      if (!userData) {
-        return next(ApiError.UnauthorizedError());
-      }
+
       const { word } = req.body;
-      console.log(word);
       // TODO chek empty property
       const updatedWord = await vocabularyService.updateWord(
         userData.id,
-        word as IVocabularyModel
+        word as Partial<IVocabularyModel>
       );
       console.log("======== VocabularyController update");
       res.json(updatedWord);
@@ -70,15 +62,28 @@ class VocabularyController {
 
   async updates(req, res, next) {
     try {
-      // TODO cheack on norm str
-      const { words } = req.body;
-      // Pro,ice all or 1 request????
+      const userData = res.locals.user;
 
-      // const {refreshToken} = req.cookies;
-      // const token = await userService.logout(refreshToken);
-      // res.clearCookie('refreshToken');
-      // console.log('======== logout');
-      // res.json(token);
+      // TODO Add normal request type with updates
+      const { words } = req.body;
+      console.log("words body", words);
+      // TODO chek empty property
+      const result = await vocabularyService.updateWords(userData.id, words);
+      console.log("======== VocabularyController updatessss");
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req, res, next) {
+    try {
+      const userData = res.locals.user;
+      const { id } = req.body;
+      // TODO chek empty property
+      const result = await vocabularyService.deleteWord(userData.id, id);
+      console.log("======== VocabularyController delete");
+      res.json(result);
     } catch (error) {
       next(error);
     }
