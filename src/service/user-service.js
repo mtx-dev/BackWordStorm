@@ -25,7 +25,7 @@ class UserService {
     // await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
     const userDto = new UserDto(user);
 
-    const tokens = tokenService.generateTokens({ ...userDto });
+    const tokens = tokenService.generateTokens({ ...userDto.toPayload() });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
     return { ...tokens, user: userDto };
@@ -50,6 +50,7 @@ class UserService {
       throw ApiError.BadRequest("Incorrect email or password");
     }
     const userDto = new UserDto(user);
+    console.log("________ ", userDto.toPayload(), userDto);
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
