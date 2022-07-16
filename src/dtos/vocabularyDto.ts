@@ -13,7 +13,7 @@ export class VocabularyWordDto {
   active: boolean;
 
   constructor(model: IVocabularyModel) {
-    this.id = model._id;
+    this.id = model.id;
     this.word = model.word;
     this.translation = model.translation;
     this.note = model.note;
