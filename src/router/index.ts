@@ -37,8 +37,13 @@ router.get(
 );
 
 router.get("/vocabulary", authMiddleware, vocabularyController.getVocabulary);
-router.post("/vocabulary/add", authMiddleware, vocabularyController.addWord);
+router.post("/vocabulary", authMiddleware, vocabularyController.addWord);
+router.delete("/vocabulary", authMiddleware, vocabularyController.delete);
 router.patch("/vocabulary/update", authMiddleware, vocabularyController.update);
-router.put("/vocabulary/updates", authMiddleware, vocabularyController.updates);
+router.patch(
+  "/vocabulary/updates",
+  authMiddleware,
+  vocabularyController.updates
+);
 
 export default router;
