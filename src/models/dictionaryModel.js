@@ -6,9 +6,23 @@ import {
   RUSSIAN_DICTIONARY_COLLECTION,
 } from "../config/index.js";
 
-const DictionarySchema = new Schema({
-  word: { type: String, unique: true, required: true },
-  translations: [{ type: String }],
+const DictionarySchema = new Schema(
+  {
+    word: { type: String, unique: true, required: true },
+    translations: [{ type: String }],
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+const virtual = DictionarySchema.virtual("id");
+virtual.set(function (value) {
+  this._id = value;
+});
+virtual.get(function () {
+  return this._id;
 });
 
 export const EngDictionaryModel = model(
