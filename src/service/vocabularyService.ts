@@ -6,7 +6,7 @@ import { VocabularyWordDto } from "../dtos/vocabularyDto";
 class vocabularyService {
   public async getVocabulary(userId: Types.ObjectId) {
     const vocabulary = await VocabularyModel.find({ user: userId });
-    console.log("Voc service: get - ", vocabulary);
+    // console.log("Voc service: get - ", vocabulary);
     if (!vocabulary) {
       throw ApiError.BadRequest("Vocabulary is empty");
     }
