@@ -214,7 +214,8 @@ const upCollections = async () => {
 };
 
 const commands = {
-  up: async () => upCollections(),
+  up: upCollections,
+  uprus: () => upCollection(flow[1].name, flow[1].path, flow[1].model),
   dropAll: dropAll,
   drop: drop,
 };

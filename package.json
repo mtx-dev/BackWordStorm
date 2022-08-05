@@ -9,6 +9,7 @@
     "start": "node dist/index.js",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
     "migrate:up": "node migrations/migrate.js up",
+    "migrate:uprus": "node migrations/migrate.js uprus",
     "migrate:drop:all": "node migrations/migrate.js dropAll"
   },
   "keywords": [],
