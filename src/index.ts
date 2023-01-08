@@ -16,10 +16,14 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: process.env.CLIENT_URL,
+    origin: process.env.CLIENT_URL || "*",
   })
 );
 app.use("/api", router);
+app.get("/", (req, res) => {
+  res.send("WordStorm Backend Server");
+});
+
 app.use(errorMiddleware);
 
 const start = async () => {
