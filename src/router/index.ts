@@ -9,8 +9,13 @@ import vocabularyController from "../controllers/vocabularyController";
 const router = Router();
 
 router.get("/", (req, res) => {
-  res.send("WordStorm Function endpoint: /api");
+  res.send("WordStorm Backend Server");
 });
+
+router.get("/api", (req, res) => {
+  res.send("WordStorm Backend Server API route");
+});
+
 router.post(
   "/registration",
   body("email").isEmail(),
