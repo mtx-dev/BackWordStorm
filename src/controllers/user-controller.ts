@@ -1,6 +1,7 @@
 import userService from "../service/user-service";
 import { validationResult } from "express-validator";
 import ApiError from "../exeptions/api-error";
+import { UserDto } from "../dtos/user-dto";
 
 class UserController {
   async registration(req, res, next) {
@@ -79,6 +80,17 @@ class UserController {
 
   async getUsers(req, res, next) {
     try {
+      const users = await userService.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateUser(req, res, next) {
+    try {
+      const userData: UserDto = res.locals.user;
+      const { word, translation, note } = req.body;
       const users = await userService.getAllUsers();
       res.json(users);
     } catch (error) {
