@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 import router from "./router";
 import errorMiddleware from "./middlewares/error-middleware.js";
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.json());
@@ -28,12 +28,14 @@ app.use(errorMiddleware);
 
 const start = async () => {
   try {
-    console.log("  WordStorm");
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-    });
+    console.log("==========  WordStorm SERVER  ========");
+    if (process.env.DB_URL) {
+      await mongoose.connect(process.env.DB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+      });
+    }
     app.listen(PORT, () => console.log(`Server started on PORT = ${PORT}`));
   } catch (error) {
     console.log(error);
