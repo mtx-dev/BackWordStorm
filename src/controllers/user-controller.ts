@@ -87,14 +87,14 @@ class UserController {
     }
   }
 
-  async updateUser(req, res, next) {
+  async updateUserSettings(req, res, next) {
     try {
       const userData: UserDto = res.locals.user;
       // TODO Add normal request type with updates
-      const { user } = req.body;
-      console.log("update user body", user);
+      const { settings } = req.body;
+      console.log("update user body", settings);
       // TODO chek empty property
-      const result = await userService.updateUser(userData.id, user);
+      const result = await userService.updateUser(userData.id, settings);
       console.log("result", result);
       res.json(result);
     } catch (error) {

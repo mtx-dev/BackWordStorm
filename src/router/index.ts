@@ -23,7 +23,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/mongo-status", (req, res) => {
-  res.send(`Mongo connection staus: ${connectionStatus()}`);
+  res.send(`Mongo connection status: ${connectionStatus()}`);
 });
 
 router.post(
@@ -37,7 +37,11 @@ router.post("/logout", userController.logout);
 router.get("/activate/:link", userController.activate);
 router.get("/refresh", userController.refresh);
 router.get("/users", authMiddleware, userController.getUsers);
-router.patch("/user", authMiddleware, userController.updateUser);
+router.patch(
+  "/users/settings",
+  authMiddleware,
+  userController.updateUserSettings
+);
 
 router.get(
   "/dictionaryary/search",

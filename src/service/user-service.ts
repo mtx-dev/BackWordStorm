@@ -5,7 +5,7 @@ import { v4 } from "uuid";
 import tokenService from "./token-service";
 import { UserDto } from "../dtos/user-dto";
 import ApiError from "../exeptions/api-error";
-import { IUser } from "../interfaces/IUser";
+import { ISettings } from "../interfaces/IUser";
 import { Types } from "mongoose";
 
 class UserService {
@@ -85,22 +85,16 @@ class UserService {
     return users;
   }
 
-  async updateUser(userId: Types.ObjectId, userUpdates: Partial<IUser>) {
-    if (!userUpdates) {
+  async updateUser(userId: Types.ObjectId, settings: Partial<ISettings>) {
+    if (!settings) {
       throw ApiError.BadRequest(`Updates is epmty`);
     }
-    const ALLOWED_USER_FIELDS_TO_UPDATE = ["settings"];
-    const allowedUserUpdates = Object.fromEntries(
-      Object.entries(userUpdates).filter((entry) =>
-        ALLOWED_USER_FIELDS_TO_UPDATE.includes(entry[0])
-      )
-    );
 
     const user = await UserModel.updateOne(
       {
         _id: userId,
       },
-      { $set: { ...allowedUserUpdates } }
+      { $set: { settings: { ...settings } } }
     );
 
     return { user };
