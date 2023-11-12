@@ -23,7 +23,7 @@ class VocabularyController {
     try {
       const userData: UserDto = res.locals.user;
       const { word, translation, note } = req.body;
-      console.log("body", word, translation, note);
+
       // TODO Rework to express validation
       if (!word || !translation) {
         return next(ApiError.BadRequest(`Word and translation are required`));
