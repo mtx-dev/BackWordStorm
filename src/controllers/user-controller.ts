@@ -8,7 +8,7 @@ class UserController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return next(ApiError.BadRequest("Error validation", errors));
+        return next(ApiError.BadRequest("Error validation", errors.array()));
       }
       const { email, password } = req.body;
       const userData = await userService.registration(email, password);
@@ -90,9 +90,13 @@ class UserController {
   async updateUser(req, res, next) {
     try {
       const userData: UserDto = res.locals.user;
-      const { word, translation, note } = req.body;
-      const users = await userService.getAllUsers();
-      res.json(users);
+      // TODO Add normal request type with updates
+      const { user } = req.body;
+      console.log("update user body", user);
+      // TODO chek empty property
+      const result = await userService.updateUser(userData.id, user);
+      console.log("result", result);
+      res.json(result);
     } catch (error) {
       next(error);
     }

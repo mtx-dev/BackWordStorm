@@ -5,6 +5,8 @@ import { v4 } from "uuid";
 import tokenService from "./token-service";
 import { UserDto } from "../dtos/user-dto";
 import ApiError from "../exeptions/api-error";
+import { IUser } from "../interfaces/IUser";
+import { Types } from "mongoose";
 
 class UserService {
   async registration(email, password) {
@@ -40,7 +42,7 @@ class UserService {
     await user.save();
   }
 
-  async login(email, password) {
+  async login(email: string, password: string) {
     const user = await UserModel.findOne({ email });
     if (!user) {
       throw ApiError.BadRequest("User with this email did not find");
@@ -50,7 +52,6 @@ class UserService {
       throw ApiError.BadRequest("Incorrect email or password");
     }
     const userDto = new UserDto(user);
-    console.log("________ ", userDto.toPayload(), userDto);
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
@@ -62,7 +63,7 @@ class UserService {
     return token;
   }
 
-  async refresh(refreshToken) {
+  async refresh(refreshToken?: string) {
     if (!refreshToken) {
       throw ApiError.UnauthorizedError();
     }
@@ -82,6 +83,27 @@ class UserService {
   async getAllUsers() {
     const users = UserModel.find();
     return users;
+  }
+
+  async updateUser(userId: Types.ObjectId, userUpdates: Partial<IUser>) {
+    if (!userUpdates) {
+      throw ApiError.BadRequest(`Updates is epmty`);
+    }
+    const ALLOWED_USER_FIELDS_TO_UPDATE = ["settings"];
+    const allowedUserUpdates = Object.fromEntries(
+      Object.entries(userUpdates).filter((entry) =>
+        ALLOWED_USER_FIELDS_TO_UPDATE.includes(entry[0])
+      )
+    );
+
+    const user = await UserModel.updateOne(
+      {
+        _id: userId,
+      },
+      { $set: { ...allowedUserUpdates } }
+    );
+
+    return { user };
   }
 }
 
