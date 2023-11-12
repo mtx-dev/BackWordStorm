@@ -1,19 +1,29 @@
 import { Router } from "express";
+import mongoose from "mongoose";
+
 import userController from "../controllers/user-controller";
 import { body } from "express-validator";
 import authMiddleware from "../middlewares/auth-middleware";
 
 import dictionaryController from "../controllers/dictionaryController";
 import vocabularyController from "../controllers/vocabularyController";
+const connectionStauses = [
+  "disconnected",
+  "connected",
+  "connecting",
+  "disconnecting",
+];
+const connectionStatus = () =>
+  connectionStauses[mongoose.connection.readyState];
 
 const router = Router();
 
 router.get("/", (req, res) => {
-  res.send("WordStorm Backend Server");
+  res.send("WordStorm Backend Server API");
 });
 
-router.get("/api", (req, res) => {
-  res.send("WordStorm Backend Server API route");
+router.get("/mongo-status", (req, res) => {
+  res.send(`Mongo connection staus: ${connectionStatus()}`);
 });
 
 router.post(
@@ -27,6 +37,7 @@ router.post("/logout", userController.logout);
 router.get("/activate/:link", userController.activate);
 router.get("/refresh", userController.refresh);
 router.get("/users", authMiddleware, userController.getUsers);
+router.patch("/user", authMiddleware, userController.updateUser);
 
 router.get(
   "/dictionaryary/search",
