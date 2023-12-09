@@ -1,6 +1,6 @@
 # BackWordStorm
-Server of WordStorm
-Its regular express js server for 
+Server of WordStorm.
+Its regular express js server for website Wordstorm
 
 ## Installation
 
